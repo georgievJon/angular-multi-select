@@ -77,6 +77,7 @@ angular_multi_select.directive('angularMultiSelect',
 			attrs.selectionMode = attrs.selectionMode === "1" ? "single" : attrs.selectionMode;
 			attrs.selectionMode = attrs.selectionMode.toLowerCase();
 			attrs.toggleChildren = attrs.toggleChildren === "false" ? false : true;
+			attrs.toggleOnlyChildren = attrs.toggleOnlyChildren === "true";
 			attrs.helperElements = attrs.helperElements || "reset filter";
 			attrs.searchProperty = attrs.searchProperty || "";
 			attrs.hiddenProperty = attrs.hiddenProperty || "";
@@ -652,7 +653,9 @@ angular_multi_select.directive('angularMultiSelect',
 					}
 				}
 
-				if(_break === true  || !attrs.toggleChildren) return;
+				if(_break === true  || !attrs.toggleChildren || attrs.toggleOnlyChildren){
+					return;
+				}
 
 				angular.forEach($scope._getNodes(model), function(item) {
 					item[attrs.tickProperty] = $scope._areAllChecked(item) !== 0;
@@ -675,6 +678,10 @@ angular_multi_select.directive('angularMultiSelect',
 			$scope._flipCheck = function(item) {
 				if($scope._hasChildren(item) > 0 && attrs.toggleChildren) {
 					var _state = Math.abs($scope._areAllChecked(item)) === 0;
+
+					if (attrs.toggleOnlyChildren) {
+						_state = !$scope._isChecked(item);
+					}
 
 					$scope._walk(item, attrs.groupProperty, function(_item) {
 						if(_state) {

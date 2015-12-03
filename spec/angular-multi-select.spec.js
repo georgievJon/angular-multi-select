@@ -47,7 +47,7 @@ describe('Testing directive in single mode', function() {
 
 	afterEach(function() {
 		element.remove();
-		elementn = null;
+		element = null;
 	});
 
 	it('Should be able to create the directive.', function() {
@@ -358,5 +358,72 @@ describe('Testing directive button label customization and API', function() {
 		var items = $('.ams_item:not(.ams_group) > .ams_tick').prev();
 		expect(items).toContainText("Chromium");
 		expect(items).toContainText("Firefox");
+	});
+});
+
+describe('Testing directive in only children selection mode', function () {
+  var scope, element, html, timeout;
+
+  beforeEach(function () {
+
+    module('angular-multi-select');
+
+    html = '<div angular-multi-select ' +
+      'id-property="id"' +
+      'input-model="items" ' +
+      'output-model="x" ' +
+      'output-model-props=\'["name"]\'' +
+      'group-property="sub" ' +
+      'tick-property="check" ' +
+      'item-label="<[ name ]>" ' +
+      'helper-elements="all none reset filter"' +
+      'selection-mode="multi" ' +
+		  'toggle-only-children="true" '+
+      'button-label="<[ icon ]> <[ name ]>"' +
+      'button-label-separator=\'[", ","!?"]\'' +
+      'button-template="angular-multi-select-btn-data.htm"' +
+      '></div>';
+
+    inject(function ($compile, $rootScope, $timeout) {
+      //create a scope (you could just use $rootScope, I suppose)
+      scope = $rootScope;
+      timeout = $timeout;
+
+      //get the jqLite or jQuery element
+      element = angular.element(html);
+
+      //compile the element into a function to process the view.
+      $compile(element)($rootScope);
+
+      element.scope().items = multi_test_data;
+      element.scope().api = {};
+      element.scope().$digest();
+
+      $(document.body).append(element);
+    });
+  });
+
+  afterEach(function () {
+    element.remove();
+    elementn = null;
+  });
+
+  it('Should select all children when clicked parent group ', function() {
+		timeout.flush();
+		expect($('.ams_selected', "li:contains('Modern browsers')" )).toHaveLength(3);
+		$(".ams_item > div:contains('Closed Source')").click();
+		expect($('.ams_selected', "li:contains('Modern browsers')" )).toHaveLength(5);
+  });
+
+	it("Should deselect only children", function() {
+		timeout.flush();
+
+		expect($('.ams_selected', "li:contains('Old Browsers')" )).toHaveLength(0);
+		$(".ams_item > div:contains('Old Browsers')").click();
+		expect($('.ams_selected', "li:contains('Old Browsers')" )).toHaveLength(4);
+		$(".ams_item > div:contains('Epiphany')").click();
+		$(".ams_item > div:contains('Netscape')").click();
+		$(".ams_item > div:contains('Konqueror')").click();
+		expect($('.ams_selected', "li:contains('Old Browsers')" )).toHaveLength(1);
 	});
 });
